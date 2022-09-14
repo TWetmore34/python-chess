@@ -28,12 +28,22 @@ def main():
     gs = ChessEngine.GameState()
     loadImages()
     running = True
-
+    clicked = False
+    last = []
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+
         drawGameState(screen, gs)
+        # handle clicks
+        if p.mouse.get_pressed()[0] and not clicked:
+            last = handleClickOne(gs.board, clicked, False)
+            clicked = True
+        elif p.mouse.get_pressed()[0] and clicked:
+            last = handleClickOne(gs.board, clicked, last)
+            clicked = False
+
         clock.tick(max_fps)
         p.display.flip()
 
@@ -54,13 +64,29 @@ def drawBoard(screen):
 
 # draws pieces based on gs
 def drawPieces(screen, board):
-    
-    pass
     for r in range(dimension):
         for c in range(dimension):
             piece = board[r][c]
             if piece != '--':
                 screen.blit(images[piece], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+def handleClickOne(board, clicked, last):
+    pos = p.mouse.get_pos()
+    x = int(pos[0] / SQ_SIZE)
+    y = int(pos[1] / SQ_SIZE)
+    lastInput = [y, x]
+    print(last, clicked)
+    if clicked and last:
+        board[y][x] = board[last[0]][last[1]]
+        board[last[0]][last[1]] = '--'
+    
+    if board[y][x] == '--':
+        return []
+    else:
+        return lastInput
+
+
 
 if __name__ == '__main__':
     main()
